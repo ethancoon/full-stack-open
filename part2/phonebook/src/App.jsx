@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import Form from './components/Form'
 import People from './components/People'
+import axios from 'axios'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -48,6 +49,16 @@ const App = () => {
     let filteredPersons = persons.filter(person => person.name.toLowerCase().includes(filterName.toLowerCase()))
     setListShown(filteredPersons)
   }
+
+  useEffect(() => {
+    const eventHandler = response => {
+      console.log('promise fulfilled')
+      setPersons(response.data)
+    }
+
+    const promise = axios.get('http://localhost:3001/persons')
+    promise.then(eventHandler)
+  })
 
   return (
     <div>
