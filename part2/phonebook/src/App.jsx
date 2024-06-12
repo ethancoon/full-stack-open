@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import Form from './components/Form'
 import People from './components/People'
+import Notification from './components/Notification'
 import peopleService from './services/people'
 
 const App = () => {
@@ -10,6 +11,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [message, setMessage] = useState({})
 
   useEffect(() => {
     peopleService
@@ -30,20 +32,44 @@ const App = () => {
       alert(`${newName} is already added to the phonebook`)
       return
     } else if (persons.some(person => person.name === newName)) {
-        window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)
-        const person = persons.find(person => person.name === newName)
-        const changedPerson = { ...person, number: newNumber }
-        peopleService
-          .update(person.id, changedPerson)
-          .then(returnedPerson => {
-            const newPersons = persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson)
-            setPersons(newPersons)
-            const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
-            setListShown(filteredPersons)
-            setNewName('')
-            setNewNumber('')
-          })
-        return
+        if (window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)) {
+          const person = persons.find(person => person.name === newName)
+          const changedPerson = { ...person, number: newNumber }
+          peopleService
+            .update(person.id, changedPerson)
+            .then(returnedPerson => {
+              const newPersons = persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson)
+              setPersons(newPersons)
+              const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+              setListShown(filteredPersons)
+              setNewName('')
+              setNewNumber('')
+              setMessage({
+                content: `Number for ${newName} changed`,
+                type: 'success'
+              })
+              setTimeout(() => {
+                setMessage({})
+              }, 5000)
+      
+            })
+            .catch(error => {
+              setMessage({
+                content: `Information of ${newName} has already been removed from the server`,
+                type: 'error'
+              })
+              setTimeout(() => {
+                setMessage({})
+              }, 5000)
+              const newPersons = persons.filter(existingPerson => existingPerson.id !== person.id)
+              setPersons(newPersons)
+              const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+              setListShown(filteredPersons)
+            })
+          return
+        } else {
+          return
+        }
     }
 
     peopleService
@@ -55,6 +81,22 @@ const App = () => {
         setListShown(filteredPersons)
         setNewName('')
         setNewNumber('')
+        setMessage({
+          content: `Added ${newName}`,
+          type: 'success'
+        })
+        setTimeout(() => {
+          setMessage({})
+        }, 5000)
+      })
+      .catch(error => {
+        setMessage({
+          content: `Unable to add information for ${newName}`,
+          type: 'error'
+        })
+        setTimeout(() => {
+          setMessage({})
+        }, 5000)
       })
   }
 
@@ -78,9 +120,13 @@ const App = () => {
           setListShown(filteredPersons)
         })
         .catch(error => {
-          alert(
-            `the person '${person.name}' was already deleted from server`
-          )
+          setMessage({
+            content: `Information of ${person.name} has already been removed from the server`,
+            type: 'error'
+          })
+          setTimeout(() => {
+            setMessage({})
+          }, 5000)
           const newPersons = persons.filter(person => person.id !== id)
           setPersons(newPersons)
           const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
@@ -99,6 +145,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification 
+        message={message.content} 
+        messageType={message.type} 
+      />
 
       <Filter 
       newFilter={newFilter} 
