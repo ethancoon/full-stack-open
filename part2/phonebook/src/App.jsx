@@ -26,9 +26,24 @@ const App = () => {
       name: newName,
       number: newNumber
     }
-    if (persons.some(person => person.name === newName)) {
+    if (persons.some(person => person.name === newName && person.number === newNumber)) {
       alert(`${newName} is already added to the phonebook`)
       return
+    } else if (persons.some(person => person.name === newName)) {
+        window.confirm(`${newName} is already added to the phonebook, replace the old number with a new one?`)
+        const person = persons.find(person => person.name === newName)
+        const changedPerson = { ...person, number: newNumber }
+        peopleService
+          .update(person.id, changedPerson)
+          .then(returnedPerson => {
+            const newPersons = persons.map(person => person.id !== returnedPerson.id ? person : returnedPerson)
+            setPersons(newPersons)
+            const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+            setListShown(filteredPersons)
+            setNewName('')
+            setNewNumber('')
+          })
+        return
     }
 
     peopleService
@@ -49,6 +64,29 @@ const App = () => {
 
   const handleNumberChange = (event) => {
     setNewNumber(event.target.value)
+  }
+
+  const handlePersonDelete = (id) => {
+    const person = persons.find(person => person.id === id)
+    if (window.confirm(`Delete ${person.name}?`)) {
+      peopleService
+        .deletePerson(id)
+        .then(() => {
+          const newPersons = persons.filter(person => person.id !== id)
+          setPersons(newPersons)
+          const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+          setListShown(filteredPersons)
+        })
+        .catch(error => {
+          alert(
+            `the person '${person.name}' was already deleted from server`
+          )
+          const newPersons = persons.filter(person => person.id !== id)
+          setPersons(newPersons)
+          const filteredPersons = newPersons.filter(person => person.name.toLowerCase().includes(newFilter.toLowerCase()))
+          setListShown(filteredPersons)
+        })
+    }
   }
 
   const handleFilterChange = (event) => {
@@ -78,7 +116,10 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <People listShown={listShown} />
+      <People 
+        listShown={listShown} 
+        handlePersonDelete={handlePersonDelete}
+      />
     </div>
   )
 }
