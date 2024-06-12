@@ -10,7 +10,6 @@ const App = () => {
   useEffect(() => {
 		axios.get("https://restcountries.com/v3.1/all").then(response => {
 			setCountryList(response.data);
-      setCountryListFiltered(response.data);
 		});
 	}, []);
 

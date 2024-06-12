@@ -1,4 +1,5 @@
 import Country from './Country'
+import CountryConcise from './CountryConcise'
 
 const Display = ({ countries }) => {    
     if (countries.length >= 10) {
@@ -15,9 +16,7 @@ const Display = ({ countries }) => {
         return (
         <div>
             {countries.map(country => (
-            <div key={country.name.official}>
-                {country.name.official}
-            </div>
+            <CountryConcise key={country.name.official} country={country}/>
             ))}
         </div>
         )
