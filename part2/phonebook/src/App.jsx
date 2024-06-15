@@ -55,7 +55,7 @@ const App = () => {
             })
             .catch(error => {
               setMessage({
-                content: `Information of ${newName} has already been removed from the server`,
+                content: `Error changing number for ${newName}: ${error.response.data.error}`,
                 type: 'error'
               })
               setTimeout(() => {
@@ -91,7 +91,7 @@ const App = () => {
       })
       .catch(error => {
         setMessage({
-          content: `Unable to add information for ${newName}`,
+          content: `Error adding ${newName}: ${error.response.data.error}`,
           type: 'error'
         })
         setTimeout(() => {
