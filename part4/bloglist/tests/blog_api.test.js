@@ -115,6 +115,87 @@ describe('api methods', () => {
             .send(newBlog2)
             .expect(400)
     })
+
+    test('deleting a blog post', async () => {
+        const response = await api.get('/api/blogs')
+        const blogToDelete = response.body[0]
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .expect(204)
+
+        const response2 = await api.get('/api/blogs')
+        assert.strictEqual(response2.body.length, initialBlogs.length - 1)
+    })
+
+    test('delete a blog post with an invalid id', async () => {
+        await api
+            .delete('/api/blogs/123')
+            .expect(400)
+    })
+
+    test('updating a blog post', async () => {
+        const response = await api.get('/api/blogs')
+        const blogToUpdate = response.body[0]
+
+        const updatedBlog = {
+            title: 'HTML is hard',
+            author: 'John Doe',
+            url: 'www.johndoe.com',
+            likes: 5
+        }
+
+        await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(updatedBlog)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        const response2 = await api.get('/api/blogs')
+        const titles = response2.body.map(e => e.title)
+        assert(titles.includes('HTML is hard'))
+    })
+
+    test('updating a blog post without including required param title', async () => {
+        const updatedBlog = {
+            author: 'John Doe',
+            url: 'www.johndoe.com',
+            likes: 5
+        }
+
+        await api
+            .put(`/api/blogs/${initialBlogs[0].id}`)
+            .send(updatedBlog)
+            .expect(400)
+    })
+
+    test('updating a blog post without including required param author', async () => {
+        const updatedBlog = {
+            title: 'HTML is hard',
+            url: 'www.johndoe.com',
+            likes: 5
+        }
+
+        await api
+            .put(`/api/blogs/${initialBlogs[0].id}`)
+            .send(updatedBlog)
+            .expect(400)
+    })
+
+    test('updating a blog post with an invalid id', async () => {
+        const updatedBlog = {
+            title: 'HTML is hard',
+            author: 'John Doe',
+            url: 'www.johndoe.com',
+            likes: 5
+        }
+
+        await api
+            .put('/api/blogs/123')
+            .send(updatedBlog)
+            .expect(400)
+    })
+
 })
 
 after(async () => {
