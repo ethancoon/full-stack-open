@@ -4,35 +4,21 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
+const helper = require('./helper')
 
 const api = supertest(app)
 
-const initialBlogs = [
-  {
-    title: 'HTML is easy',
-    author: 'John Doe',
-    url: 'www.johndoe.com',
-    likes: 5
-    },
-    {
-    title: 'CSS is easy',
-    author: 'Jane Doe',
-    url: 'www.janedoe.com',
-    likes: 10
-    }
-]
 
-beforeEach(async () => {
-    await Blog.deleteMany({})
-    let blogObject = new Blog(initialBlogs[0])
-    await blogObject.save()
-    blogObject = new Blog(initialBlogs[1])
-    await blogObject.save()
-})
-  
+describe('testing blog api', () => {
+    beforeEach(async () => {
+		await Blog.deleteMany({});
+		const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
+		const promiseArray = blogObjects.map(blog => blog.save());
+		await Promise.all(promiseArray);
+	});
 
-
-describe('api methods', () => {
     test('notes are returned as json', async () => {
         await api
             .get('/api/blogs')
@@ -42,13 +28,13 @@ describe('api methods', () => {
     
     test('all blogs are returned', async () => {
         const response = await api.get('/api/blogs')
-        assert.strictEqual(response.body.length, initialBlogs.length)
+        assert.strictEqual(response.body.length, helper.initialBlogs.length)
     })
 
     test('a specific blog is within the returned blogs', async () => {
         const response = await api.get('/api/blogs')
         const titles = response.body.map(e => e.title)
-        assert(titles.includes('HTML is easy'))
+        assert(titles.includes('Canonical string reduction'))
     })
 
     test('verifies that the unique identifier property of the blog posts is named id', async () => {
@@ -58,7 +44,7 @@ describe('api methods', () => {
 
     test('a valid blog can be added', async () => {
         const newBlog = {
-            title: 'React patterns',
+            title: 'CSS is hard',
             author: 'Me',
             url: 'www.me.com',
             likes: 0
@@ -71,8 +57,8 @@ describe('api methods', () => {
         
         const response = await api.get('/api/blogs')
         const titles = response.body.map(e => e.title)
-        assert.strictEqual(response.body.length, initialBlogs.length + 1)
-        assert(titles.includes('React patterns'))
+        assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
+        assert(titles.includes('CSS is hard'))
     })
 
     test('if the likes property is missing from the request, it will default to the value 0', async () => {
@@ -125,7 +111,7 @@ describe('api methods', () => {
             .expect(204)
 
         const response2 = await api.get('/api/blogs')
-        assert.strictEqual(response2.body.length, initialBlogs.length - 1)
+        assert.strictEqual(response2.body.length, helper.initialBlogs.length - 1)
     })
 
     test('delete a blog post with an invalid id', async () => {
@@ -164,7 +150,7 @@ describe('api methods', () => {
         }
 
         await api
-            .put(`/api/blogs/${initialBlogs[0].id}`)
+            .put(`/api/blogs/${helper.initialBlogs[0].id}`)
             .send(updatedBlog)
             .expect(400)
     })
@@ -177,7 +163,7 @@ describe('api methods', () => {
         }
 
         await api
-            .put(`/api/blogs/${initialBlogs[0].id}`)
+            .put(`/api/blogs/${helper.initialBlogs[0].id}`)
             .send(updatedBlog)
             .expect(400)
     })
@@ -197,6 +183,104 @@ describe('api methods', () => {
     })
 
 })
+
+describe('testing users api', () => {
+    beforeEach(async () => {
+		await User.deleteMany({});
+		const passwordHash = await bcrypt.hash("spt", 10);
+		const user = new User({
+			username: "shturman",
+			name: "John Shturman",
+			passwordHash,
+		});
+
+		await user.save();
+	});
+
+
+    test('users are returned as json', async () => {
+        await api
+            .get('/api/users')
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+    })
+
+    test('all users are returned', async () => {
+        const response = await api.get('/api/users')
+        assert.strictEqual(response.body.length, 1)
+    })
+
+    test('a specific user is within the returned users', async () => {
+        const response = await api.get('/api/users')
+        const usernames = response.body.map(e => e.username)
+        assert(usernames.includes('shturman'))
+    })
+
+    test('a valid user can be added', async () => {
+        const newUser = {
+            username: 'newuser',
+            name: 'New User',
+            password: 'password'
+        }
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+        
+        const response = await api.get('/api/users')
+        const usernames = response.body.map(e => e.username)
+        assert(usernames.includes('newuser'))
+        assert.strictEqual(response.body.length, 2)
+    })
+
+    test('if the password or username properties are missing from the request data, the backend responds to the request with the status code 400 Bad Request', async () => {
+        const newUser = {
+            name: 'New User',
+            password: 'password'
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+
+        const newUser2 = {
+            username: 'newuser',
+            name: 'New User'
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser2)
+            .expect(400)
+    })
+
+    test('if the password or username properties are less than 3 characters long, the backend responds to the request with the status code 400 Bad Request', async () => {
+        const newUser = {
+            username: 'ne',
+            name: 'New User',
+            password: 'password'
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+
+        const newUser2 = {
+            username: 'newuser',
+            name: 'New User',
+            password: 'pa'
+        }
+
+        await api
+            .post('/api/users')
+            .send(newUser2)
+            .expect(400)
+    })
+})
+    
 
 after(async () => {
   await mongoose.connection.close()

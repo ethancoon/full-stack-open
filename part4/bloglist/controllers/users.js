@@ -10,6 +10,16 @@ usersRouter.get('/', async (request, response) => {
 usersRouter.post('/', async (request, response) => {
   const { username, name, password } = request.body
 
+  const exisitingUser = await User.findOne({ username });
+
+  if (exisitingUser) {
+    return response.status(400).json({ error: 'username already exists' })
+  }
+
+  if (!password || password.length < 3|| !username || username.length < 3) {
+    return response.status(400).json({ error: 'password or username is missing or too short' })
+  }
+
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(password, saltRounds)
 
