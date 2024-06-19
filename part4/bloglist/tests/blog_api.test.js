@@ -17,9 +17,11 @@ describe('testing blog api', () => {
 		const blogObjects = helper.initialBlogs.map(blog => new Blog(blog));
 		const promiseArray = blogObjects.map(blog => blog.save());
 		await Promise.all(promiseArray);
+
+        await User.deleteMany({});   
 	});
 
-    test('notes are returned as json', async () => {
+    test('blogs are returned as json', async () => {
         await api
             .get('/api/blogs')
             .expect(200)
@@ -49,9 +51,30 @@ describe('testing blog api', () => {
             url: 'www.me.com',
             likes: 0
         }
+
+        const user = await api
+        .post('/api/users')
+        .send({
+            username: 'testuser',
+            name: 'Test User',
+            password: 'password'
+        })
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const token = await api
+        .post('/api/login')
+        .send({
+            username: 'testuser',
+            password: 'password'
+        })
+        .expect(200)
+        .expect('Content-Type', /application\/json/)     
+
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(201)
             .expect('Content-Type', /application\/json/)
         
@@ -68,9 +91,29 @@ describe('testing blog api', () => {
             url: 'www.me.com'
         }
 
+        const user = await api
+        .post('/api/users')
+        .send({
+            username: 'testuser',
+            name: 'Test User',
+            password: 'password'
+        })
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const token = await api
+        .post('/api/login')
+        .send({
+            username: 'testuser',
+            password: 'password'
+        })
+        .expect(200)
+        .expect('Content-Type', /application\/json/)     
+
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
@@ -86,9 +129,29 @@ describe('testing blog api', () => {
             likes: 0
         }
 
+        const user = await api
+        .post('/api/users')
+        .send({
+            username: 'testuser',
+            name: 'Test User',
+            password: 'password'
+        })
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const token = await api
+        .post('/api/login')
+        .send({
+            username: 'testuser',
+            password: 'password'
+        })
+        .expect(200)
+        .expect('Content-Type', /application\/json/)     
+
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(400)
 
         const newBlog2 = {
@@ -99,26 +162,98 @@ describe('testing blog api', () => {
         await api
             .post('/api/blogs')
             .send(newBlog2)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(400)
     })
 
     test('deleting a blog post', async () => {
-        const response = await api.get('/api/blogs')
-        const blogToDelete = response.body[0]
+        const user = await api
+            .post('/api/users')
+            .send({ username: 'Deleter', password: '1234' })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login/')
+            .send({ username: user.body.username, password: '1234' })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        const createdBlog = await api
+            .post('/api/blogs')
+            .send({ title: 'to delete', author: 'to delete', url: 'www.delete.com', likes: 1, user: user.body.id})
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const blogToDelete = createdBlog.body
+        const blogsAfterCreating = await helper.blogsInDB()
 
         await api
             .delete(`/api/blogs/${blogToDelete.id}`)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(204)
 
-        const response2 = await api.get('/api/blogs')
-        assert.strictEqual(response2.body.length, helper.initialBlogs.length - 1)
+        const response2 = await helper.blogsInDB()
+        const titles = response2.map(e => e.title)
+        assert(!titles.includes('to delete'))
     })
 
     test('delete a blog post with an invalid id', async () => {
+        const user = await api
+            .post('/api/users')
+            .send({
+                username: 'testuser',
+                name: 'Test User',
+                password: 'password'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login')
+            .send({
+                username: 'testuser',
+                password: 'password'
+            })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)     
+        
         await api
             .delete('/api/blogs/123')
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(400)
     })
+
+    test('delete a blog post without a token', async () => {
+        const user = await api
+            .post('/api/users')
+            .send({ username: 'Deleter', password: '1234' })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login/')
+            .send({ username: user.body.username, password: '1234' })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+        
+        const createdBlog = await api
+            .post('/api/blogs')
+            .send({ title: 'to delete', author: 'to delete', url: 'www.delete.com', likes: 1, user: user.body.id})
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const blogToDelete = createdBlog.body
+        const blogsAfterCreating = await helper.blogsInDB()
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .expect(401)
+    })
+
+
 
     test('updating a blog post', async () => {
         const response = await api.get('/api/blogs')
@@ -131,9 +266,29 @@ describe('testing blog api', () => {
             likes: 5
         }
 
+        const user = await api
+            .post('/api/users')
+            .send({
+                username: 'testuser',
+                name: 'Test User',
+                password: 'password'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login')
+            .send({
+                username: 'testuser',
+                password: 'password'
+            })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)     
+
         await api
             .put(`/api/blogs/${blogToUpdate.id}`)
             .send(updatedBlog)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(200)
             .expect('Content-Type', /application\/json/)
         
@@ -149,9 +304,29 @@ describe('testing blog api', () => {
             likes: 5
         }
 
+        const user = await api
+            .post('/api/users')
+            .send({
+                username: 'testuser',
+                name: 'Test User',
+                password: 'password'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login')
+            .send({
+                username: 'testuser',
+                password: 'password'
+            })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)     
+
         await api
             .put(`/api/blogs/${helper.initialBlogs[0].id}`)
             .send(updatedBlog)
+            .set({ 'Authorization': `bearer ${token.body.token}`, Accept: 'application/json' })
             .expect(400)
     })
 
@@ -161,6 +336,25 @@ describe('testing blog api', () => {
             url: 'www.johndoe.com',
             likes: 5
         }
+
+        const user = await api
+            .post('/api/users')
+            .send({
+                username: 'testuser',
+                name: 'Test User',
+                password: 'password'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login')
+            .send({
+                username: 'testuser',
+                password: 'password'
+            })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)     
 
         await api
             .put(`/api/blogs/${helper.initialBlogs[0].id}`)
@@ -175,6 +369,25 @@ describe('testing blog api', () => {
             url: 'www.johndoe.com',
             likes: 5
         }
+
+        const user = await api
+            .post('/api/users')
+            .send({
+                username: 'testuser',
+                name: 'Test User',
+                password: 'password'
+            })
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const token = await api
+            .post('/api/login')
+            .send({
+                username: 'testuser',
+                password: 'password'
+            })
+            .expect(200)
+            .expect('Content-Type', /application\/json/)     
 
         await api
             .put('/api/blogs/123')
