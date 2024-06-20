@@ -13,9 +13,13 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  const [title, setTitle] = useState('')
-  const [author, setAuthor] = useState('')
-  const [url, setUrl] = useState('')
+  const initBlog = {
+    title: '',
+    author: '',
+    url: ''
+  }
+
+  const [blog, setBlog] = useState(initBlog)
 
 
   useEffect(() => {
@@ -74,16 +78,18 @@ const App = () => {
   const handleCreate = async (event) => {
     event.preventDefault()
 
+
     try {
-      const blog = await blogService.create({
+      const title = blog.title
+      const author = blog.author
+      const url = blog.url
+      const newBlog = await blogService.create({
         title, author, url
       })
-      setBlogs(blogs.concat(blog))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
+      setBlogs(blogs.concat(newBlog))
+      setBlog(initBlog)
       setMessage({
-        content: `A new blog ${title} by ${author} added`,
+        content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
         type: 'info'
       })
       setTimeout(() => {
@@ -113,12 +119,8 @@ const App = () => {
 
         <CreateBlog
           handleCreate={handleCreate}
-          title={title}
-          setTitle={setTitle}
-          author={author}
-          setAuthor={setAuthor}
-          url={url}
-          setUrl={setUrl}
+          blog={blog}
+          setBlog={setBlog}
         />
 
         {blogs.map(blog =>

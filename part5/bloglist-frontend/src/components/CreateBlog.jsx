@@ -1,31 +1,31 @@
-const CreateBlog = ({ handleCreate, title, setTitle, author, setAuthor, url, setUrl }) => {
+const CreateBlog = ({ handleCreate, blog, setBlog }) => {
     return (
         <form onSubmit={handleCreate}>
           <div>
             title:
               <input
               type="text"
-              value={title}
+              value={blog.title}
               name="Title"
-              onChange={({ target }) => setTitle(target.value)}
+              onChange={({ target }) => setBlog(prev => ({ ...prev, title: target.value }))}
               />
           </div>
           <div>
             author:
               <input
               type="text"
-              value={author}
+              value={blog.author}
               name="Author"
-              onChange={({ target }) => setAuthor(target.value)}
+              onChange={({ target }) => setBlog(prev => ({ ...prev, author: target.value }))}
               />
           </div>
           <div>
             url:
               <input
               type="text"
-              value={url}
+              value={blog.url}
               name="url"
-              onChange={({ target }) => setUrl(target.value)}
+              onChange={({ target }) => setBlog(prev => ({ ...prev, url: target.value }))}
               />
           </div>
           <button type="submit">create</button>
