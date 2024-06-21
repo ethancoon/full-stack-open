@@ -4,7 +4,8 @@ const CreateBlog = ({ handleCreate }) => {
     const initBlog = {
       title: '',
       author: '',
-      url: ''
+      url: '',
+      likes: 0
     }
     const [blog, setBlog] = useState(initBlog)
 

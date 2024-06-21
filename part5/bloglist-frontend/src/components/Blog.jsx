@@ -1,7 +1,8 @@
 import { useState } from 'react'
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, handleLike }) => {
   const [detailed, setDetailed] = useState(false)
+  const [postedBy, setPostedBy] = useState('')
 
   const showWhenDetailed = { display: detailed ? '' : 'none' }
   const showWhenNotDetailed = { display: detailed ? 'none' : '' }
@@ -17,6 +18,18 @@ const Blog = ({ blog }) => {
     borderWidth: 1,
     marginBottom: 5
   }
+
+  const increaseLikes = async (event) => {
+    event.preventDefault()
+    const updatedBlog = {
+      ...blog,
+      likes: blog.likes + 1
+    }
+    setPostedBy(postedBy || blog.user?.name)
+
+    handleLike(blog.id, updatedBlog)
+  }
+
   
   return (
     <div style={blogStyle}>
@@ -31,9 +44,9 @@ const Blog = ({ blog }) => {
         {blog.url}
         <br />
         likes {blog.likes}
-        <button>like</button>
+        <button onClick={increaseLikes}>like</button>
         <br />
-        {blog.user.name}
+        {blog.user?.name || postedBy}
       </div>
     </div>
   )

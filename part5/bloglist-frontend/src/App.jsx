@@ -76,8 +76,9 @@ const App = () => {
       const title = blogObject.title
       const author = blogObject.author
       const url = blogObject.url
+      const likes = blogObject.likes
       const newBlog = await blogService.create({
-        title, author, url
+        title, author, url, likes
       })
       setBlogs(blogs.concat(newBlog))
       setMessage({
@@ -91,6 +92,22 @@ const App = () => {
       console.log(exception)
       setMessage({
         content: `Error creating blog`,
+        type: 'error'
+      })
+      setTimeout(() => {
+        setMessage({})
+      }, 5000)
+    }
+  }
+
+  const handleLike = async (id, updatedBlog) => {
+    try {
+      const returnedBlog = await blogService.update(id, updatedBlog)
+      setBlogs(blogs.map(b => b.id !== id ? b : returnedBlog))
+    } catch (exception) {
+      console.log(exception)
+      setMessage({
+        content: `Error updating blog`,
         type: 'error'
       })
       setTimeout(() => {
@@ -117,7 +134,7 @@ const App = () => {
         </Togglable>
 
         {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} />
+          <Blog key={blog.id} blog={blog} handleLike={handleLike}/>
         )}
       </div>
     )
