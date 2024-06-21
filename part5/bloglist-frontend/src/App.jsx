@@ -18,29 +18,29 @@ const App = () => {
 
 
   useEffect(() => {
-		blogService.getAll().then(blogs => setBlogs(blogs));
-	}, []);
+    blogService.getAll().then(blogs => setBlogs(blogs))
+  }, [])
 
-	useEffect(() => {
-		const loggedUserJSON = window.localStorage.getItem("loggedBlogAppUser");
-		if (loggedUserJSON) {
-			const user = JSON.parse(loggedUserJSON);
-			setUser(user);
-			blogService.setToken(user.token);
-		}
-	}, []);
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
 
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    
+
     try {
       const user = await loginService.login({
         username, password,
       })
       window.localStorage.setItem(
         'loggedBlogAppUser', JSON.stringify(user)
-      ) 
+      )
       setUser(user)
       blogService.setToken(user.token)
       setUsername('')
@@ -56,7 +56,7 @@ const App = () => {
     } catch (exception) {
       console.log(exception)
       setMessage({
-        content: `Wrong credentials`,
+        content: 'Wrong credentials',
         type: 'error'
       })
       setTimeout(() => {
@@ -91,7 +91,7 @@ const App = () => {
     } catch (exception) {
       console.log(exception)
       setMessage({
-        content: `Error creating blog`,
+        content: 'Error deleting blog',
         type: 'error'
       })
       setTimeout(() => {
@@ -107,7 +107,7 @@ const App = () => {
     } catch (exception) {
       console.log(exception)
       setMessage({
-        content: `Error updating blog`,
+        content: 'Error deleting blog',
         type: 'error'
       })
       setTimeout(() => {
@@ -123,7 +123,7 @@ const App = () => {
     } catch (exception) {
       console.log(exception)
       setMessage({
-        content: `Error deleting blog`,
+        content: 'Error deleting blog',
         type: 'error'
       })
       setTimeout(() => {
@@ -148,10 +148,10 @@ const App = () => {
         </Togglable>
 
         {blogs
-        .sort((a, b) => b.likes - a.likes)
-        .map(blog =>
-          <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
-        )}
+          .sort((a, b) => b.likes - a.likes)
+          .map(blog =>
+            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
+          )}
       </div>
     )
   } else {
