@@ -116,6 +116,22 @@ const App = () => {
     }
   }
 
+  const handleDelete = async (id) => {
+    try {
+      await blogService.remove(id)
+      setBlogs(blogs.filter(b => b.id !== id))
+    } catch (exception) {
+      console.log(exception)
+      setMessage({
+        content: `Error deleting blog`,
+        type: 'error'
+      })
+      setTimeout(() => {
+        setMessage({})
+      }, 5000)
+    }
+  }
+
   if (user !== null) {
     return (
       <div>
@@ -124,8 +140,6 @@ const App = () => {
 
         <Notification message={message.content} messageType={message.type} />
 
-        
-
         <Togglable buttonLabel='new blog' ref={blogFormRef}>
           <h2>create new</h2>
           <CreateBlog
@@ -133,8 +147,10 @@ const App = () => {
           />
         </Togglable>
 
-        {blogs.map(blog =>
-          <Blog key={blog.id} blog={blog} handleLike={handleLike}/>
+        {blogs
+        .sort((a, b) => b.likes - a.likes)
+        .map(blog =>
+          <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
         )}
       </div>
     )
