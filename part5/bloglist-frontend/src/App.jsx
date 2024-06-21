@@ -14,14 +14,6 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
-  const initBlog = {
-    title: '',
-    author: '',
-    url: ''
-  }
-
-  const [blog, setBlog] = useState(initBlog)
-
   const blogFormRef = useRef()
 
 
@@ -78,18 +70,16 @@ const App = () => {
     setUser(null)
   }
 
-  const handleCreate = async (event) => {
-    event.preventDefault()
+  const handleCreate = async (blogObject) => {
     blogFormRef.current.toggleVisibility()
     try {
-      const title = blog.title
-      const author = blog.author
-      const url = blog.url
+      const title = blogObject.title
+      const author = blogObject.author
+      const url = blogObject.url
       const newBlog = await blogService.create({
         title, author, url
       })
       setBlogs(blogs.concat(newBlog))
-      setBlog(initBlog)
       setMessage({
         content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
         type: 'info'
@@ -123,8 +113,6 @@ const App = () => {
           <h2>create new</h2>
           <CreateBlog
             handleCreate={handleCreate}
-            blog={blog}
-            setBlog={setBlog}
           />
         </Togglable>
 
