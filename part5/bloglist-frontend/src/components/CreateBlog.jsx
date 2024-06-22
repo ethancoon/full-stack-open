@@ -20,6 +20,7 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             title:
         <input
+          id="title-input"
           type="text"
           value={blog.title}
           name="Title"
@@ -29,6 +30,7 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             author:
         <input
+          id="author-input"
           type="text"
           value={blog.author}
           name="Author"
@@ -38,13 +40,14 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             url:
         <input
+          id="url-input"
           type="text"
           value={blog.url}
           name="url"
           onChange={({ target }) => setBlog(prev => ({ ...prev, url: target.value }))}
         />
       </div>
-      <button type="submit">create</button>
+      <button id="submit-button" type="submit">create</button>
     </form>
 
   )
