@@ -38,7 +38,7 @@ const Blog = ({ blog, handleLike, handleDelete }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className="blog">
       <div style={showWhenNotDetailed} className="blogDefaultView">
         {blog.title} {blog.author}
         <button onClick={toggleDetailed}>view</button>

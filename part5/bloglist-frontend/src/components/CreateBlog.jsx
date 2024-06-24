@@ -20,6 +20,7 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             title:
         <input
+          data-testid="title"
           id="title-input"
           type="text"
           value={blog.title}
@@ -30,6 +31,7 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             author:
         <input
+          data-testid="author"
           id="author-input"
           type="text"
           value={blog.author}
@@ -40,6 +42,7 @@ const CreateBlog = ({ handleCreate }) => {
       <div>
             url:
         <input
+          data-testid="url"
           id="url-input"
           type="text"
           value={blog.url}

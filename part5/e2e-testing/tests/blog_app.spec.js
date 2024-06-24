@@ -47,4 +47,39 @@ describe('Blog app', () => {
     })
   })
 
+  describe('When logged in', () => {
+    beforeEach(async ({ page }) => {
+        await page.getByTestId('username').fill('playwright')
+        await page.getByTestId('password').fill('playwright')
+        await page.getByRole('button', { name: 'login' }).click()
+    })
+
+    test('A blog can be created', async ({ page }) => {
+        await page.getByRole('button', { name: 'new blog' }).click()
+
+        await page.getByTestId('title').fill('test blog')
+        await page.getByTestId('author').fill('test author')
+        await page.getByTestId('url').fill('test url')
+
+        await page.getByRole('button', { name: 'create' }).click()
+
+        const defaultViewDiv = await page.locator('.blogDefaultView')
+        await expect(defaultViewDiv).toContainText('test blog test author')
+    })
+
+    test('A blog can be liked', async ({ page }) => {
+      await page.getByRole('button', { name: 'new blog' }).click()
+
+      await page.getByTestId('title').fill('test blog')
+      await page.getByTestId('author').fill('test author')
+      await page.getByTestId('url').fill('test url')
+
+      await page.getByRole('button', { name: 'create' }).click()
+    
+      await page.getByRole('button', { name: 'view' }).click()
+      await page.getByRole('button', { name: 'like' }).click()
+    })
+
+  })
+
 })
