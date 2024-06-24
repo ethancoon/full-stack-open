@@ -30,7 +30,6 @@ const App = () => {
     }
   }, [])
 
-
   const handleLogin = async (event) => {
     event.preventDefault()
 
@@ -71,18 +70,18 @@ const App = () => {
   }
 
   const handleCreate = async (blogObject) => {
-    blogFormRef.current.toggleVisibility()
     try {
+      blogFormRef.current.toggleVisibility()
       const title = blogObject.title
       const author = blogObject.author
       const url = blogObject.url
       const likes = blogObject.likes
       const newBlog = await blogService.create({
-        title, author, url, likes
+        title, author, url, likes, user: user.id
       })
       setBlogs(blogs.concat(newBlog))
       setMessage({
-        content: `A new blog ${newBlog.title} by ${newBlog.author} added`,
+        content: `A new blog ${newBlog.title} by author ${newBlog.author} added by user ${user.name}`,
         type: 'info'
       })
       setTimeout(() => {
@@ -150,7 +149,7 @@ const App = () => {
         {blogs
           .sort((a, b) => b.likes - a.likes)
           .map(blog =>
-            <Blog key={blog.id} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
+            <Blog key={blog.id} username={user.username} blog={blog} handleLike={handleLike} handleDelete={handleDelete}/>
           )}
       </div>
     )

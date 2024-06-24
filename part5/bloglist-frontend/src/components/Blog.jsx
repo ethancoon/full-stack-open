@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, handleLike, handleDelete }) => {
+const Blog = ({ blog, username, handleLike, handleDelete }) => {
   const [detailed, setDetailed] = useState(false)
   const [postedBy, setPostedBy] = useState('')
 
