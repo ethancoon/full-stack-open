@@ -39,7 +39,7 @@ describe('Testing blog rendering', () => {
 
   test('renders detailed view after clicking the view button', async () => {
     const user = userEvent.setup()
-    const button = screen.getByText("view")
+    const button = screen.getByText('view')
 
     await user.click(button)
 
@@ -56,10 +56,10 @@ describe('Testing blog rendering', () => {
 
   test('clicking the like button twice calls the event handler twice', async () => {
     const user = userEvent.setup()
-    const viewButton = screen.getByText("view")
+    const viewButton = screen.getByText('view')
     await user.click(viewButton)
 
-    const likeButton = screen.getByText("like")
+    const likeButton = screen.getByText('like')
     await user.click(likeButton)
     await user.click(likeButton)
 

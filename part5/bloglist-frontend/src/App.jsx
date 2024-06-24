@@ -159,6 +159,8 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
 
+        <Notification message={message.content} messageType={message.type} />
+
         <Login
           handleLogin={handleLogin}
           username={username}
