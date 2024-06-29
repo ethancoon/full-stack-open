@@ -35,7 +35,7 @@ export const createVote = (id) => {
   }
 }
 
-const initialState = anecdotesAtStart.map(asObject)
+const initialState = anecdotesAtStart.map(asObject) 
 
 const anecdoteReducer = (state = initialState, action) => {
   switch (action.type) {
