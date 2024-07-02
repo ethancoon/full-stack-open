@@ -1,10 +1,10 @@
-export const parseBmiArguments = (height: String, weight: String): { height: number, weight: number } => {
+export const parseBmiArguments = (height: string, weight: string): { height: number, weight: number } => {
     if (isNaN(Number(height)) || isNaN(Number(weight))) throw new Error('Provided values were not numbers!');
     return {
         height: Number(height),
         weight: Number(weight)
     };
-}
+};
 
 export const calculateBmi = (height: number, weight: number): string => {
     const bmi = weight / Math.pow(height / 100, 2);

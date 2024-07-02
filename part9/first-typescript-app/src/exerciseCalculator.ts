@@ -1,4 +1,4 @@
-interface Result {
+export interface Result {
   periodLength: number;
   trainingDays: number;
   success: boolean;
@@ -13,7 +13,7 @@ interface ExerciseValues {
   daily_exercises: Array<number>;
 }
 
-const parseExerciseArguments = (args: Array<string>): ExerciseValues => {
+export const parseExerciseArguments = (args: Array<string>): ExerciseValues => {
     if (args.length < 4) throw new Error('Not enough arguments');
     const target = Number(args[2]);
     const daily_exercises = args.slice(3).map(Number);
@@ -26,9 +26,9 @@ const parseExerciseArguments = (args: Array<string>): ExerciseValues => {
         target,
         daily_exercises
     };
-}
+};
 
-const calculateExercises = (daily_exercises: Array<number>, target: number): Result => {
+export const calculateExercises = (daily_exercises: Array<number>, target: number): Result => {
     const periodLength = daily_exercises.length;
     const trainingDays = daily_exercises.filter(d => d > 0).length;
     const average = daily_exercises.reduce((a, b) => a + b, 0) / periodLength;
@@ -44,13 +44,4 @@ const calculateExercises = (daily_exercises: Array<number>, target: number): Res
         target,
         average
     };
-}
-
-try {
-    const { target, daily_exercises } = parseArguments(process.argv);
-    console.log(calculateExercises(daily_exercises, target));
-} catch (error: unknown) {
-    if (error instanceof Error) {
-        console.log('Error, something bad happened, message: ', error.message);
-    }
-}
+};
