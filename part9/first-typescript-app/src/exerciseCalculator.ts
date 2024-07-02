@@ -13,7 +13,7 @@ interface ExerciseValues {
   daily_exercises: Array<number>;
 }
 
-const parseArguments = (args: Array<string>): ExerciseValues => {
+const parseExerciseArguments = (args: Array<string>): ExerciseValues => {
     if (args.length < 4) throw new Error('Not enough arguments');
     const target = Number(args[2]);
     const daily_exercises = args.slice(3).map(Number);
